@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Shabid • Multi-Admin Dashboard</title>
+  <title>Admin Dashboard</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -24,7 +24,7 @@
     }
   </style>
 </head>
-<body class="text-slate-100 p-3 md:p-8 flex flex-col items-center justify-center min-h-screen">
+<body class="text-slate-100 p-3 md:p-8 flex flex-col items-center justify-between min-h-screen">
 
   <!-- Toast Notification -->
   <div id="toast" class="fixed top-5 right-5 z-50 bg-emerald-500/90 text-white px-5 py-3 rounded-2xl shadow-2xl border border-emerald-400/30 text-xs md:text-sm font-semibold flex items-center gap-3 transition-all duration-300 opacity-0 -translate-y-5 pointer-events-none">
@@ -32,21 +32,31 @@
     <span id="toastMsg">কপি করা হয়েছে!</span>
   </div>
 
-  <!-- 1. Multi-Admin Login Screen -->
+  <!-- Top Navigation Link -->
+  <nav class="w-full max-w-6xl flex justify-between items-center p-3 mb-2 glass rounded-2xl text-xs">
+    <span class="font-bold text-indigo-400 flex items-center gap-2">
+      <i class="fa-solid fa-user-shield"></i> Admin Portal
+    </span>
+    <a href="index.html" class="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-300 rounded-xl transition flex items-center gap-1.5 font-medium">
+      <i class="fa-solid fa-house text-[10px]"></i> Student Form
+    </a>
+  </nav>
+
+  <!-- 1. Login Screen -->
   <div id="loginScreen" class="w-full max-w-md p-6 md:p-8 glass rounded-3xl shadow-2xl my-auto">
     <div class="text-center mb-6">
       <div class="w-14 h-14 bg-indigo-500/10 border border-indigo-500/30 text-indigo-400 rounded-2xl flex items-center justify-center mx-auto mb-3 text-2xl shadow-inner">
-        <i class="fa-solid fa-user-shield"></i>
+        <i class="fa-solid fa-lock"></i>
       </div>
-      <h2 class="text-2xl font-extrabold tracking-tight bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">Admin Portal</h2>
+      <h2 class="text-2xl font-extrabold tracking-tight bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">Admin Authentication</h2>
       <p class="text-slate-400 text-xs mt-1">Govt. Azizul Haque College • Shabid Admin</p>
     </div>
 
     <form id="loginForm" class="space-y-4">
       <div>
-        <label class="block text-xs font-medium text-slate-300 mb-1.5">আপনার গ্রুপ নির্বাচন করুন</label>
+        <label class="block text-xs font-medium text-slate-300 mb-1.5">গ্রুপ নির্বাচন করুন</label>
         <select id="loginGroup" required class="w-full px-4 py-3 bg-slate-900/80 border border-slate-700 rounded-xl text-xs md:text-sm text-slate-200 outline-none focus:ring-2 focus:ring-indigo-500">
-          <option value="SUPER">👑 Super Admin (All Groups)</option>
+          <option value="SUPER">👑 Owner / Super Admin (সকল গ্রুপ এক সাথে)</option>
           <option value="A">Group A (Roll 1-30)</option>
           <option value="B">Group B (Roll 31-60)</option>
           <option value="C">Group C (Roll 61-90)</option>
@@ -56,12 +66,12 @@
           <option value="G">Group G (Roll 181-210)</option>
           <option value="H">Group H (Roll 211-240)</option>
           <option value="I">Group I (Roll 241-270)</option>
-          <option value="J">Group J (Roll 271-300+)</option>
+          <option value="J">Group J (Roll 271+)</option>
         </select>
       </div>
 
       <div>
-        <label class="block text-xs font-medium text-slate-300 mb-1.5">অ্যাডমিন পাসওয়ার্ড</label>
+        <label class="block text-xs font-medium text-slate-300 mb-1.5">পাসওয়ার্ড</label>
         <input type="password" id="loginPassword" required placeholder="পাসওয়ার্ড লিখুন" class="w-full px-4 py-3 bg-slate-900/80 border border-slate-700 rounded-xl text-xs md:text-sm text-slate-200 outline-none focus:ring-2 focus:ring-indigo-500">
       </div>
 
@@ -76,7 +86,7 @@
   </div>
 
   <!-- 2. Dashboard Screen -->
-  <div id="dashboard" class="w-full max-w-6xl hidden space-y-6 my-auto">
+  <div id="dashboard" class="w-full max-w-6xl hidden space-y-5 my-auto">
     <!-- Top Bar -->
     <header class="flex flex-col sm:flex-row items-center justify-between gap-4 p-5 glass rounded-2xl">
       <div class="text-center sm:text-left">
@@ -130,30 +140,34 @@
             </tr>
           </thead>
           <tbody id="tableBody" class="divide-y divide-slate-800/50 text-xs text-slate-300">
-            <!-- Dynamic Data Insertion -->
+            <!-- Dynamic Data -->
           </tbody>
         </table>
       </div>
     </div>
   </div>
 
+  <footer class="mt-6 text-slate-500 text-[11px] text-center">
+    &copy; Shabid Admin • All Rights Reserved
+  </footer>
+
   <script src="config.js"></script>
   <script>
     // ==========================================
-    // প্রতিটি গ্রুপের আলাদা আলাদা পাসওয়ার্ড সেটআপ
+    // পাসওয়ার্ড সেটআপ
     // ==========================================
     const GROUP_PASSWORDS = {
-      SUPER: "shabid123", // সুপার এডমিনের পাসওয়ার্ড (সব দেখতে পাবে)
-      A: "groupA123",
-      B: "groupB123",
-      C: "groupC123",
-      D: "groupD123",
-      E: "groupE123",
-      F: "groupF123",
-      G: "groupG123",
-      H: "groupH123",
-      I: "groupI123",
-      J: "groupJ123"
+      SUPER: "shabid7878", // 👑 Owner Super Admin Pass (সব ডাটা শো করবে)
+      A: "groupA1272823",
+      B: "groupB1388323",
+      C: "groupC1283833",
+      D: "groupD182383823",
+      E: "groupE12728263",
+      F: "groupF1272723",
+      G: "groupG1272723",
+      H: "groupH1272723",
+      I: "groupI1238282",
+      J: "groupJ127383"
     };
 
     let activeAdminGroup = null;
@@ -174,7 +188,7 @@
         loginScreen.classList.add('hidden');
         dashboard.classList.remove('hidden');
         
-        document.getElementById('roleBadge').innerText = selectedGroup === 'SUPER' ? '👑 Super Admin' : `Group ${selectedGroup}`;
+        document.getElementById('roleBadge').innerText = selectedGroup === 'SUPER' ? '👑 Owner Super Admin' : `Group ${selectedGroup}`;
         
         fetchData();
       } else {
@@ -197,7 +211,6 @@
 
       let query = _supabase.from('student_info').select('*').order('roll', { ascending: true });
       
-      // যদি Super Admin না হয়, তবে শুধু তার নির্দিষ্ট গ্রুপের ডাটা দেখাবে
       if (activeAdminGroup !== 'SUPER') {
         query = query.eq('assigned_group', activeAdminGroup);
       }
@@ -234,7 +247,7 @@
             <td class="p-4 text-slate-300 whitespace-nowrap">${s.subject}</td>
             <td class="p-4 font-mono text-slate-300 whitespace-nowrap">${s.phone}</td>
             <td class="p-4 text-center whitespace-nowrap">
-              <button onclick="copySingleStudent(${s.roll})" title="স্টুডেন্টের তথ্য কপি করুন" class="px-2.5 py-1.5 bg-slate-800 hover:bg-slate-700 text-indigo-300 rounded-lg border border-slate-700 transition">
+              <button onclick="copySingleStudent(${s.roll})" title="কপি করুন" class="px-2.5 py-1.5 bg-slate-800 hover:bg-slate-700 text-indigo-300 rounded-lg border border-slate-700 transition">
                 <i class="fa-regular fa-copy"></i>
               </button>
             </td>
@@ -252,7 +265,6 @@
       renderTable(filtered);
     }
 
-    // single copy
     function copySingleStudent(rollNum) {
       const s = fetchedStudentsData.find(item => item.roll === rollNum);
       if (!s) return;
@@ -262,7 +274,6 @@
       showToast(`${s.name}-এর তথ্য কপি হয়েছে!`);
     }
 
-    // copy all
     function copyAllData() {
       if (fetchedStudentsData.length === 0) {
         showToast('কপি করার মতো কোনো ডাটা নেই!');
@@ -270,7 +281,7 @@
       }
 
       let text = `🎓 *Govt. Azizul Haque College - Student List*\n`;
-      text += `👥 Admin: ${activeAdminGroup === 'SUPER' ? 'All Groups' : 'Group ' + activeAdminGroup}\n\n`;
+      text += `👥 Admin: ${activeAdminGroup === 'SUPER' ? 'Owner / All Groups' : 'Group ' + activeAdminGroup}\n\n`;
 
       fetchedStudentsData.forEach((s, i) => {
         text += `${i + 1}. ${s.name} | Roll: ${s.roll} | Group: ${s.assigned_group} | Dept: ${s.subject} | Mobile: ${s.phone}\n`;
