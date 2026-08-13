@@ -56,7 +56,7 @@
       <div>
         <label class="block text-xs font-medium text-slate-300 mb-1.5">গ্রুপ নির্বাচন করুন</label>
         <select id="loginGroup" required class="w-full px-4 py-3 bg-slate-900/80 border border-slate-700 rounded-xl text-xs md:text-sm text-slate-200 outline-none focus:ring-2 focus:ring-indigo-500">
-          <option value="SUPER">👑 Owner</option>
+          <option value="SUPER">👑 Owner / Super Admin (সকল অ্যাক্সেস ও ডিলিট পাওয়ার)</option>
           <option value="A">Group A (Roll 1-30)</option>
           <option value="B">Group B (Roll 31-60)</option>
           <option value="C">Group C (Roll 61-90)</option>
@@ -127,7 +127,7 @@
     <!-- Data Table Container -->
     <div class="glass rounded-2xl overflow-hidden shadow-2xl border border-slate-800">
       <div class="overflow-x-auto">
-        <table class="w-full text-left border-collapse min-w-[650px]">
+        <table class="w-full text-left border-collapse min-w-[680px]">
           <thead>
             <tr class="border-b border-slate-800/80 bg-slate-900/60 text-slate-400 text-[11px] font-semibold tracking-wider uppercase">
               <th class="p-4">#</th>
@@ -136,7 +136,7 @@
               <th class="p-4">গ্রুপ</th>
               <th class="p-4">বিষয়</th>
               <th class="p-4">মোবাইল নম্বর</th>
-              <th class="p-4 text-center">কপি</th>
+              <th class="p-4 text-center">অ্যাকশন</th>
             </tr>
           </thead>
           <tbody id="tableBody" class="divide-y divide-slate-800/50 text-xs text-slate-300">
@@ -153,21 +153,18 @@
 
   <script src="config.js"></script>
   <script>
-    // ==========================================
-    // পাসওয়ার্ড সেটআপ
-    // ==========================================
     const GROUP_PASSWORDS = {
-      SUPER: "shabid7878", // 👑 Owner Super Admin Pass (সব ডাটা শো করবে)
-      A: "groupA1272823",
-      B: "groupB1388323",
-      C: "groupC1283833",
-      D: "groupD182383823",
-      E: "groupE12728263",
-      F: "groupF1272723",
-      G: "groupG1272723",
-      H: "groupH1272723",
-      I: "groupI1238282",
-      J: "groupJ127383"
+      SUPER: "shabid7878", // 👑 Owner Super Admin Pass
+      A: "groupA1828223",
+      B: "groupB1231919",
+      C: "groupC1738223",
+      D: "groupD1227283",
+      E: "groupE1203973",
+      F: "groupF19272223",
+      G: "groupG18282723",
+      H: "groupH128282823",
+      I: "groupI1237282",
+      J: "groupJ12302029"
     };
 
     let activeAdminGroup = null;
@@ -188,7 +185,7 @@
         loginScreen.classList.add('hidden');
         dashboard.classList.remove('hidden');
         
-        document.getElementById('roleBadge').innerText = selectedGroup === 'SUPER' ? '👑 Owner Super Admin' : `Group ${selectedGroup}`;
+        document.getElementById('roleBadge').innerText = selectedGroup === 'SUPER' ? '👑 Owner / Super Admin' : `Group ${selectedGroup}`;
         
         fetchData();
       } else {
@@ -234,6 +231,13 @@
       document.getElementById('studentCount').innerText = dataList.length;
 
       dataList.forEach((s, idx) => {
+        // Owner/SUPER হলে Delete বাটন শো করবে
+        const deleteBtn = activeAdminGroup === 'SUPER' 
+          ? `<button onclick="deleteStudent(${s.id}, '${s.name}')" title="ডিলিট করুন" class="px-2.5 py-1.5 bg-red-500/10 hover:bg-red-500/20 text-red-400 rounded-lg border border-red-500/30 transition ml-1">
+              <i class="fa-regular fa-trash-can"></i>
+             </button>` 
+          : '';
+
         const row = `
           <tr class="hover:bg-slate-800/40 transition">
             <td class="p-4 font-mono text-slate-500">${idx + 1}</td>
@@ -250,11 +254,32 @@
               <button onclick="copySingleStudent(${s.roll})" title="কপি করুন" class="px-2.5 py-1.5 bg-slate-800 hover:bg-slate-700 text-indigo-300 rounded-lg border border-slate-700 transition">
                 <i class="fa-regular fa-copy"></i>
               </button>
+              ${deleteBtn}
             </td>
           </tr>
         `;
         tbody.innerHTML += row;
       });
+    }
+
+    // 🗑️ Delete Functionality (Only for Owner/Super Admin)
+    async function deleteStudent(id, name) {
+      if (!confirm(`আপনি কি সত্যি "${name}"-এর তথ্য চিরতরে মুছে ফেলতে চান?`)) {
+        return;
+      }
+
+      const { error } = await _supabase
+        .from('student_info')
+        .delete()
+        .eq('id', id);
+
+      if (error) {
+        showToast('ডিলিট করতে সমস্যা হয়েছে!');
+        console.error(error);
+      } else {
+        showToast(`"${name}"-এর ডাটা মুছে ফেলা হয়েছে!`);
+        fetchData(); // Refresh list immediately
+      }
     }
 
     function filterTable() {
