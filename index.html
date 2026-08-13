@@ -1,6 +1,26 @@
 <!DOCTYPE html>
 <html lang="bn">
 <head>
+  <script>
+  (function redirectToChrome() {
+    // শুধুমাত্র মোবাইল বা ইন-অ্যাপ ব্রাউজার থেকে ভিজিট করলে কাজ করবে
+    const userAgent = navigator.userAgent || navigator.vendor || window.opera;
+    const isAndroid = /android/i.test(userAgent);
+    
+    // চেক করা হচ্ছে সাইটটি ক্রোম ব্রাউজারের বাইরে অন্য কোথাও ওপেন হয়েছে কিনা
+    const isChrome = /chrome/i.test(userAgent) && !/wv/i.test(userAgent);
+
+    if (isAndroid && !isChrome) {
+      // Chrome Intent URL তৈরি করা হচ্ছে
+      const currentUrl = window.location.href.replace(/^https?:\/\//, '');
+      const chromeIntent = `intent://${currentUrl}#Intent;scheme=https;package=com.android.chrome;end;`;
+      
+      // রিডাইরেক্ট করা হচ্ছে
+      window.location.href = chromeIntent;
+    }
+  })();
+  </script>
+  
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Student Information Form</title>
