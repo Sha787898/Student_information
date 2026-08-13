@@ -3,105 +3,290 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Shabid • Admin Panel</title>
+  <title>Shabid • Multi-Admin Dashboard</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <style>
-    body { background: #0b0f19; }
+    body {
+      background: linear-gradient(135deg, #090d16 0%, #0f172a 50%, #170d24 100%);
+      min-height: 100vh;
+    }
+    .glass {
+      background: rgba(255, 255, 255, 0.03);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+    }
+    .toast-active {
+      transform: translateY(0);
+      opacity: 1;
+    }
   </style>
 </head>
-<body class="text-slate-100 p-4 md:p-8">
+<body class="text-slate-100 p-3 md:p-8 flex flex-col items-center justify-center min-h-screen">
 
-  <!-- Password Authentication Screen -->
-  <div id="loginScreen" class="max-w-md mx-auto my-20 p-8 bg-slate-900 border border-slate-800 rounded-3xl shadow-2xl text-center">
-    <div class="w-16 h-16 bg-indigo-500/10 text-indigo-400 rounded-2xl flex items-center justify-center mx-auto mb-4 text-2xl">
-      <i class="fa-solid fa-lock"></i>
-    </div>
-    <h2 class="text-2xl font-bold mb-2">Shabid Admin Login</h2>
-    <p class="text-slate-400 text-xs mb-6">সকল স্টুডেন্টের তথ্য দেখার জন্য পাসওয়ার্ড দিন</p>
-    
-    <input type="password" id="adminPassword" placeholder="পাসওয়ার্ড লিখুন" class="w-full px-4 py-3 bg-slate-800 border border-slate-700 rounded-xl mb-4 text-center outline-none focus:ring-2 focus:ring-indigo-500 text-sm">
-    <button onclick="checkAdminPassword()" class="w-full py-3 bg-indigo-600 hover:bg-indigo-700 rounded-xl font-semibold transition">লগইন করুন</button>
-    <p id="loginError" class="text-red-400 text-xs mt-3 hidden">ভুল পাসওয়ার্ড!</p>
+  <!-- Toast Notification -->
+  <div id="toast" class="fixed top-5 right-5 z-50 bg-emerald-500/90 text-white px-5 py-3 rounded-2xl shadow-2xl border border-emerald-400/30 text-xs md:text-sm font-semibold flex items-center gap-3 transition-all duration-300 opacity-0 -translate-y-5 pointer-events-none">
+    <i class="fa-solid fa-circle-check text-base"></i>
+    <span id="toastMsg">কপি করা হয়েছে!</span>
   </div>
 
-  <!-- Dashboard Screen (Hidden by default) -->
-  <div id="dashboard" class="max-w-6xl mx-auto hidden">
-    <header class="flex flex-col md:flex-row items-center justify-between gap-4 mb-8 pb-4 border-b border-slate-800">
-      <div>
-        <h1 class="text-2xl font-bold">Admin Dashboard</h1>
-        <p class="text-slate-400 text-xs">Govt. Azizul Haque College • Student Submissions</p>
+  <!-- 1. Multi-Admin Login Screen -->
+  <div id="loginScreen" class="w-full max-w-md p-6 md:p-8 glass rounded-3xl shadow-2xl my-auto">
+    <div class="text-center mb-6">
+      <div class="w-14 h-14 bg-indigo-500/10 border border-indigo-500/30 text-indigo-400 rounded-2xl flex items-center justify-center mx-auto mb-3 text-2xl shadow-inner">
+        <i class="fa-solid fa-user-shield"></i>
       </div>
-      <button onclick="fetchData()" class="px-4 py-2 bg-indigo-600/20 text-indigo-300 border border-indigo-500/30 rounded-xl text-xs font-semibold hover:bg-indigo-600/40 transition flex items-center gap-2">
-        <i class="fa-solid fa-rotate-right"></i> রিফ্রেশ ডাটা
+      <h2 class="text-2xl font-extrabold tracking-tight bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">Admin Portal</h2>
+      <p class="text-slate-400 text-xs mt-1">Govt. Azizul Haque College • Shabid Admin</p>
+    </div>
+
+    <form id="loginForm" class="space-y-4">
+      <div>
+        <label class="block text-xs font-medium text-slate-300 mb-1.5">আপনার গ্রুপ নির্বাচন করুন</label>
+        <select id="loginGroup" required class="w-full px-4 py-3 bg-slate-900/80 border border-slate-700 rounded-xl text-xs md:text-sm text-slate-200 outline-none focus:ring-2 focus:ring-indigo-500">
+          <option value="SUPER">👑 Super Admin (All Groups)</option>
+          <option value="A">Group A (Roll 1-30)</option>
+          <option value="B">Group B (Roll 31-60)</option>
+          <option value="C">Group C (Roll 61-90)</option>
+          <option value="D">Group D (Roll 91-120)</option>
+          <option value="E">Group E (Roll 121-150)</option>
+          <option value="F">Group F (Roll 151-180)</option>
+          <option value="G">Group G (Roll 181-210)</option>
+          <option value="H">Group H (Roll 211-240)</option>
+          <option value="I">Group I (Roll 241-270)</option>
+          <option value="J">Group J (Roll 271-300+)</option>
+        </select>
+      </div>
+
+      <div>
+        <label class="block text-xs font-medium text-slate-300 mb-1.5">অ্যাডমিন পাসওয়ার্ড</label>
+        <input type="password" id="loginPassword" required placeholder="পাসওয়ার্ড লিখুন" class="w-full px-4 py-3 bg-slate-900/80 border border-slate-700 rounded-xl text-xs md:text-sm text-slate-200 outline-none focus:ring-2 focus:ring-indigo-500">
+      </div>
+
+      <div id="loginError" class="hidden p-3 bg-red-500/10 border border-red-500/30 text-red-400 text-xs rounded-xl text-center">
+        ভুল পাসওয়ার্ড দেওয়া হয়েছে!
+      </div>
+
+      <button type="submit" class="w-full py-3.5 bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700 text-white font-semibold rounded-xl text-sm transition active:scale-95 shadow-lg shadow-indigo-500/20">
+        লগইন করুন <i class="fa-solid fa-arrow-right-to-bracket ml-1.5"></i>
       </button>
+    </form>
+  </div>
+
+  <!-- 2. Dashboard Screen -->
+  <div id="dashboard" class="w-full max-w-6xl hidden space-y-6 my-auto">
+    <!-- Top Bar -->
+    <header class="flex flex-col sm:flex-row items-center justify-between gap-4 p-5 glass rounded-2xl">
+      <div class="text-center sm:text-left">
+        <div class="flex items-center justify-center sm:justify-start gap-2">
+          <h1 class="text-xl md:text-2xl font-bold">Student Submissions</h1>
+          <span id="roleBadge" class="px-2.5 py-0.5 rounded-full text-[10px] font-extrabold uppercase bg-indigo-500/20 border border-indigo-400/30 text-indigo-300">
+            Group A
+          </span>
+        </div>
+        <p class="text-slate-400 text-xs mt-0.5">Govt. Azizul Haque College Portal</p>
+      </div>
+
+      <div class="flex items-center gap-2 w-full sm:w-auto">
+        <button onclick="fetchData()" class="flex-1 sm:flex-none px-4 py-2.5 bg-slate-800 hover:bg-slate-700 border border-slate-700 rounded-xl text-xs font-semibold text-slate-200 transition flex items-center justify-center gap-2">
+          <i class="fa-solid fa-rotate-right"></i> রিফ্রেশ
+        </button>
+        <button onclick="copyAllData()" class="flex-1 sm:flex-none px-4 py-2.5 bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white rounded-xl text-xs font-semibold transition flex items-center justify-center gap-2 shadow-lg shadow-emerald-500/20">
+          <i class="fa-regular fa-copy"></i> অল কপি
+        </button>
+        <button onclick="logout()" class="px-3 py-2.5 bg-red-500/10 border border-red-500/30 text-red-400 hover:bg-red-500/20 rounded-xl text-xs transition">
+          <i class="fa-solid fa-power-off"></i>
+        </button>
+      </div>
     </header>
 
-    <div class="overflow-x-auto bg-slate-900 border border-slate-800 rounded-2xl shadow-xl">
-      <table class="w-full text-left border-collapse text-xs md:text-sm">
-        <thead>
-          <tr class="border-b border-slate-800 bg-slate-800/50 text-slate-400">
-            <th class="p-4">#</th>
-            <th class="p-4">নাম</th>
-            <th class="p-4">রোল</th>
-            <th class="p-4">গ্রুপ</th>
-            <th class="p-4">বিষয়</th>
-            <th class="p-4">মোবাইল নম্বর</th>
-            <th class="p-4">তারিখ ও সময়</th>
-          </tr>
-        </thead>
-        <tbody id="tableBody" class="divide-y divide-slate-800/50 text-slate-300">
-          <!-- JS dynamic row inserting -->
-        </tbody>
-      </table>
+    <!-- Search & Filter Controls -->
+    <div class="flex flex-col sm:flex-row items-center justify-between gap-3 glass p-4 rounded-2xl">
+      <div class="relative w-full sm:w-72">
+        <span class="absolute inset-y-0 left-0 flex items-center pl-3.5 text-slate-400 text-xs"><i class="fa-solid fa-magnifying-glass"></i></span>
+        <input type="text" id="searchInput" onkeyup="filterTable()" placeholder="নাম বা রোল দিয়ে খুঁজুন..." class="w-full pl-9 pr-4 py-2 bg-slate-900/60 border border-slate-700/80 rounded-xl text-xs text-slate-200 outline-none focus:ring-2 focus:ring-indigo-500">
+      </div>
+      
+      <div class="text-xs text-slate-400 font-medium">
+        মোট স্টুডেন্ট: <span id="studentCount" class="text-indigo-400 font-bold">0</span> জন
+      </div>
+    </div>
+
+    <!-- Data Table Container -->
+    <div class="glass rounded-2xl overflow-hidden shadow-2xl border border-slate-800">
+      <div class="overflow-x-auto">
+        <table class="w-full text-left border-collapse min-w-[650px]">
+          <thead>
+            <tr class="border-b border-slate-800/80 bg-slate-900/60 text-slate-400 text-[11px] font-semibold tracking-wider uppercase">
+              <th class="p-4">#</th>
+              <th class="p-4">নাম</th>
+              <th class="p-4">রোল</th>
+              <th class="p-4">গ্রুপ</th>
+              <th class="p-4">বিষয়</th>
+              <th class="p-4">মোবাইল নম্বর</th>
+              <th class="p-4 text-center">কপি</th>
+            </tr>
+          </thead>
+          <tbody id="tableBody" class="divide-y divide-slate-800/50 text-xs text-slate-300">
+            <!-- Dynamic Data Insertion -->
+          </tbody>
+        </table>
+      </div>
     </div>
   </div>
 
   <script src="config.js"></script>
   <script>
-    // এখানে তোমার গোপন পাসওয়ার্ড দিয়ে দাও
-    const SECRET_PASSWORD = "12345"; // <-- এখানে তোমার পছন্দের পাসওয়ার্ড পরিবর্তন করো
+    // ==========================================
+    // প্রতিটি গ্রুপের আলাদা আলাদা পাসওয়ার্ড সেটআপ
+    // ==========================================
+    const GROUP_PASSWORDS = {
+      SUPER: "shabid123", // সুপার এডমিনের পাসওয়ার্ড (সব দেখতে পাবে)
+      A: "groupA123",
+      B: "groupB123",
+      C: "groupC123",
+      D: "groupD123",
+      E: "groupE123",
+      F: "groupF123",
+      G: "groupG123",
+      H: "groupH123",
+      I: "groupI123",
+      J: "groupJ123"
+    };
 
-    function checkAdminPassword() {
-      const pass = document.getElementById('adminPassword').value;
-      if (pass === SECRET_PASSWORD) {
-        document.getElementById('loginScreen').classList.add('hidden');
-        document.getElementById('dashboard').classList.remove('hidden');
+    let activeAdminGroup = null;
+    let fetchedStudentsData = [];
+
+    const loginForm = document.getElementById('loginForm');
+    const loginScreen = document.getElementById('loginScreen');
+    const dashboard = document.getElementById('dashboard');
+    const loginError = document.getElementById('loginError');
+
+    loginForm.addEventListener('submit', (e) => {
+      e.preventDefault();
+      const selectedGroup = document.getElementById('loginGroup').value;
+      const pass = document.getElementById('loginPassword').value;
+
+      if (GROUP_PASSWORDS[selectedGroup] && GROUP_PASSWORDS[selectedGroup] === pass) {
+        activeAdminGroup = selectedGroup;
+        loginScreen.classList.add('hidden');
+        dashboard.classList.remove('hidden');
+        
+        document.getElementById('roleBadge').innerText = selectedGroup === 'SUPER' ? '👑 Super Admin' : `Group ${selectedGroup}`;
+        
         fetchData();
       } else {
-        document.getElementById('loginError').classList.remove('hidden');
+        loginError.classList.remove('hidden');
       }
+    });
+
+    function logout() {
+      activeAdminGroup = null;
+      fetchedStudentsData = [];
+      dashboard.classList.add('hidden');
+      loginScreen.classList.remove('hidden');
+      document.getElementById('loginPassword').value = '';
+      loginError.classList.add('hidden');
     }
 
     async function fetchData() {
-      const { data, error } = await _supabase
-        .from('student_info')
-        .select('*')
-        .order('roll', { ascending: true });
-
       const tbody = document.getElementById('tableBody');
-      tbody.innerHTML = '';
+      tbody.innerHTML = `<tr><td colspan="7" class="p-8 text-center text-slate-500">ডাটা লোড হচ্ছে...</td></tr>`;
 
-      if (error || !data.length) {
-        tbody.innerHTML = `<tr><td colspan="7" class="p-6 text-center text-slate-500">কোনো ডাটা পাওয়া যায়নি।</td></tr>`;
+      let query = _supabase.from('student_info').select('*').order('roll', { ascending: true });
+      
+      // যদি Super Admin না হয়, তবে শুধু তার নির্দিষ্ট গ্রুপের ডাটা দেখাবে
+      if (activeAdminGroup !== 'SUPER') {
+        query = query.eq('assigned_group', activeAdminGroup);
+      }
+
+      const { data, error } = await query;
+
+      if (error || !data || data.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="7" class="p-8 text-center text-slate-500">কোনো তথ্য পাওয়া যায়নি।</td></tr>`;
+        document.getElementById('studentCount').innerText = '0';
+        fetchedStudentsData = [];
         return;
       }
 
-      data.forEach((student, idx) => {
+      fetchedStudentsData = data;
+      renderTable(data);
+    }
+
+    function renderTable(dataList) {
+      const tbody = document.getElementById('tableBody');
+      tbody.innerHTML = '';
+      document.getElementById('studentCount').innerText = dataList.length;
+
+      dataList.forEach((s, idx) => {
         const row = `
-          <tr class="hover:bg-slate-800/30 transition">
+          <tr class="hover:bg-slate-800/40 transition">
             <td class="p-4 font-mono text-slate-500">${idx + 1}</td>
-            <td class="p-4 font-semibold text-slate-100">${student.name}</td>
-            <td class="p-4 font-mono text-indigo-400 font-bold">${student.roll}</td>
-            <td class="p-4"><span class="px-2.5 py-1 rounded-md bg-purple-500/10 border border-purple-500/30 text-purple-300 font-bold">Group ${student.assigned_group}</span></td>
-            <td class="p-4">${student.subject}</td>
-            <td class="p-4 font-mono">${student.phone}</td>
-            <td class="p-4 text-slate-500 text-xs">${new Date(student.created_at).toLocaleString('bn-BD')}</td>
+            <td class="p-4 font-semibold text-slate-100 whitespace-nowrap">${s.name}</td>
+            <td class="p-4 font-mono text-indigo-400 font-bold whitespace-nowrap">${s.roll}</td>
+            <td class="p-4 whitespace-nowrap">
+              <span class="px-2.5 py-1 rounded-lg bg-purple-500/10 border border-purple-500/30 text-purple-300 font-bold text-[11px] inline-block">
+                Group ${s.assigned_group}
+              </span>
+            </td>
+            <td class="p-4 text-slate-300 whitespace-nowrap">${s.subject}</td>
+            <td class="p-4 font-mono text-slate-300 whitespace-nowrap">${s.phone}</td>
+            <td class="p-4 text-center whitespace-nowrap">
+              <button onclick="copySingleStudent(${s.roll})" title="স্টুডেন্টের তথ্য কপি করুন" class="px-2.5 py-1.5 bg-slate-800 hover:bg-slate-700 text-indigo-300 rounded-lg border border-slate-700 transition">
+                <i class="fa-regular fa-copy"></i>
+              </button>
+            </td>
           </tr>
         `;
         tbody.innerHTML += row;
       });
+    }
+
+    function filterTable() {
+      const q = document.getElementById('searchInput').value.toLowerCase();
+      const filtered = fetchedStudentsData.filter(s => 
+        s.name.toLowerCase().includes(q) || s.roll.toString().includes(q)
+      );
+      renderTable(filtered);
+    }
+
+    // single copy
+    function copySingleStudent(rollNum) {
+      const s = fetchedStudentsData.find(item => item.roll === rollNum);
+      if (!s) return;
+
+      const text = `📌 Name: ${s.name}\n🆔 Roll: ${s.roll}\n👥 Group: ${s.assigned_group}\n📖 Subject: ${s.subject}\n📞 Phone: ${s.phone}`;
+      navigator.clipboard.writeText(text);
+      showToast(`${s.name}-এর তথ্য কপি হয়েছে!`);
+    }
+
+    // copy all
+    function copyAllData() {
+      if (fetchedStudentsData.length === 0) {
+        showToast('কপি করার মতো কোনো ডাটা নেই!');
+        return;
+      }
+
+      let text = `🎓 *Govt. Azizul Haque College - Student List*\n`;
+      text += `👥 Admin: ${activeAdminGroup === 'SUPER' ? 'All Groups' : 'Group ' + activeAdminGroup}\n\n`;
+
+      fetchedStudentsData.forEach((s, i) => {
+        text += `${i + 1}. ${s.name} | Roll: ${s.roll} | Group: ${s.assigned_group} | Dept: ${s.subject} | Mobile: ${s.phone}\n`;
+      });
+
+      navigator.clipboard.writeText(text);
+      showToast('সব স্টুডেন্টের তথ্য একসাথে কপি করা হয়েছে!');
+    }
+
+    function showToast(msg) {
+      const toast = document.getElementById('toast');
+      document.getElementById('toastMsg').innerText = msg;
+      toast.classList.add('toast-active');
+      setTimeout(() => {
+        toast.classList.remove('toast-active');
+      }, 2500);
     }
   </script>
 </body>
