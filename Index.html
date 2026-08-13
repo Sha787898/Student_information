@@ -1,1 +1,196 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Shabid | Student Info Collection</title>
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Supabase JS CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <!-- FontAwesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    body {
+      background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 50%, #311042 100%);
+      min-height: 100vh;
+    }
+    .glassmorphism {
+      background: rgba(255, 255, 255, 0.05);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+  </style>
+</head>
+<body class="text-slate-100 flex flex-col justify-between p-4 md:p-8">
 
+  <!-- Header Section -->
+  <header class="max-w-xl mx-auto w-full text-center my-6">
+    <div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-indigo-500/10 border border-indigo-500/30 text-indigo-300 text-xs md:text-sm font-medium mb-3">
+      <i class="fa-solid fa-graduation-cap"></i> Government Azizul Haque College, Bogura
+    </div>
+    <h1 class="text-3xl md:text-4xl font-extrabold tracking-tight bg-gradient-to-r from-blue-400 via-indigo-300 to-purple-400 bg-clip-text text-transparent">
+      Shabid • Student Info Portal
+    </h1>
+    <p class="text-slate-400 text-xs md:text-sm mt-2">প্রেজেন্টেশন গ্রুপ সাবমিশন ফর্ম</p>
+  </header>
+
+  <!-- Main Form Card -->
+  <main class="max-w-xl mx-auto w-full glassmorphism rounded-3xl p-6 md:p-8 shadow-2xl relative overflow-hidden">
+    <!-- Top accent glow -->
+    <div class="absolute -top-12 -right-12 w-32 h-32 bg-indigo-500/20 rounded-full blur-2xl"></div>
+
+    <form id="studentForm" class="space-y-5">
+      <!-- Name -->
+      <div>
+        <label class="block text-xs md:text-sm font-medium text-slate-300 mb-1.5">শিক্ষার্থীর নাম (Name)</label>
+        <div class="relative">
+          <span class="absolute inset-y-0 left-0 flex items-center pl-3.5 text-slate-400"><i class="fa-regular fa-user"></i></span>
+          <input type="text" id="name" required placeholder="আপনার পূর্ণ নাম লিখুন" class="w-full pl-10 pr-4 py-3 bg-slate-900/60 border border-slate-700/80 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none text-sm transition">
+        </div>
+      </div>
+
+      <!-- Roll -->
+      <div>
+        <label class="block text-xs md:text-sm font-medium text-slate-300 mb-1.5">রোল নম্বর (Class Roll)</label>
+        <div class="relative">
+          <span class="absolute inset-y-0 left-0 flex items-center pl-3.5 text-slate-400"><i class="fa-solid fa-id-card"></i></span>
+          <input type="number" id="roll" required placeholder="যেমন: 45" class="w-full pl-10 pr-4 py-3 bg-slate-900/60 border border-slate-700/80 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none text-sm transition">
+        </div>
+      </div>
+
+      <!-- Subject -->
+      <div>
+        <label class="block text-xs md:text-sm font-medium text-slate-300 mb-1.5">বিষয়/ডিপার্টমেন্ট (Subject)</label>
+        <div class="relative">
+          <span class="absolute inset-y-0 left-0 flex items-center pl-3.5 text-slate-400"><i class="fa-solid fa-book-open"></i></span>
+          <input type="text" id="subject" required placeholder="যেমন: English / Accounting" class="w-full pl-10 pr-4 py-3 bg-slate-900/60 border border-slate-700/80 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none text-sm transition">
+        </div>
+      </div>
+
+      <!-- Phone -->
+      <div>
+        <label class="block text-xs md:text-sm font-medium text-slate-300 mb-1.5">মোবাইল নম্বর (Phone Number)</label>
+        <div class="relative">
+          <span class="absolute inset-y-0 left-0 flex items-center pl-3.5 text-slate-400"><i class="fa-solid fa-phone"></i></span>
+          <input type="tel" id="phone" required placeholder="017XXXXXXXX" class="w-full pl-10 pr-4 py-3 bg-slate-900/60 border border-slate-700/80 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none text-sm transition">
+        </div>
+      </div>
+
+      <!-- Group Selection -->
+      <div>
+        <label class="block text-xs md:text-sm font-medium text-slate-300 mb-1.5">আপনার সিলেক্ট করা গ্রুপ (Select Group)</label>
+        <div class="relative">
+          <span class="absolute inset-y-0 left-0 flex items-center pl-3.5 text-slate-400"><i class="fa-solid fa-users"></i></span>
+          <select id="group" required class="w-full pl-10 pr-4 py-3 bg-slate-900 border border-slate-700/80 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none text-sm transition text-slate-200">
+            <option value="" disabled selected>আপনার গ্রুপ বেছে নিন</option>
+            <option value="A">Group A (Roll 1-30)</option>
+            <option value="B">Group B (Roll 31-60)</option>
+            <option value="C">Group C (Roll 61-90)</option>
+            <option value="D">Group D (Roll 91-120)</option>
+            <option value="E">Group E (Roll 121-150)</option>
+            <option value="F">Group F (Roll 151-180)</option>
+            <option value="G">Group G (Roll 181-210)</option>
+            <option value="H">Group H (Roll 211-240)</option>
+            <option value="I">Group I (Roll 241-270)</option>
+            <option value="J">Group J (Roll 271-300+)</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Feedback / Alert Message -->
+      <div id="alertBox" class="hidden p-3.5 rounded-xl text-xs md:text-sm font-medium transition duration-200"></div>
+
+      <!-- Submit Button -->
+      <button type="submit" id="submitBtn" class="w-full py-3.5 px-6 rounded-xl bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700 text-white font-semibold shadow-lg shadow-indigo-500/25 transition active:scale-[0.98] flex items-center justify-center gap-2">
+        <span>তথ্য জমা দিন</span>
+        <i class="fa-solid fa-paper-plane text-xs"></i>
+      </button>
+    </form>
+  </main>
+
+  <!-- Footer -->
+  <footer class="text-center my-6 text-xs text-slate-500">
+    Designed & Developed for Govt. Azizul Haque College • Admin Panel Access Only for Shabid
+  </footer>
+
+  <script src="config.js"></script>
+  <script>
+    // Group Verification Logic
+    function getCorrectGroup(roll) {
+      if (roll >= 1 && roll <= 30) return { group: 'A', chapter: 'Chapter 1' };
+      if (roll >= 31 && roll <= 60) return { group: 'B', chapter: 'Chapter 2' };
+      if (roll >= 61 && roll <= 90) return { group: 'C', chapter: 'Chapter 3' };
+      if (roll >= 91 && roll <= 120) return { group: 'D', chapter: 'Chapter 4' };
+      if (roll >= 121 && roll <= 150) return { group: 'E', chapter: 'Chapter 5' };
+      if (roll >= 151 && roll <= 180) return { group: 'F', chapter: 'Chapter 6' };
+      if (roll >= 181 && roll <= 210) return { group: 'G', chapter: 'Chapter 7' };
+      if (roll >= 211 && roll <= 240) return { group: 'H', chapter: 'Chapter 8' };
+      if (roll >= 241 && roll <= 270) return { group: 'I', chapter: 'Chapter 9' };
+      if (roll >= 271) return { group: 'J', chapter: 'Chapter 10' };
+      return null;
+    }
+
+    const form = document.getElementById('studentForm');
+    const alertBox = document.getElementById('alertBox');
+    const submitBtn = document.getElementById('submitBtn');
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      
+      const name = document.getElementById('name').value.trim();
+      const roll = parseInt(document.getElementById('roll').value);
+      const subject = document.getElementById('subject').value.trim();
+      const phone = document.getElementById('phone').value.trim();
+      const selectedGroup = document.getElementById('group').value;
+
+      const groupInfo = getCorrectGroup(roll);
+
+      if (!groupInfo) {
+        showAlert('দয়া করে সঠিক রোল নাম্বার প্রদান করুন।', 'error');
+        return;
+      }
+
+      // Check mismatch
+      if (selectedGroup !== groupInfo.group) {
+        showAlert(`ভুল গ্রুপ সিলেক্ট করেছেন! আপনার রোল (${roll}) অনুযায়ী সঠিক গ্রুপ হলো: Group ${groupInfo.group} (${groupInfo.chapter})। দয়া করে সঠিক গ্রুপ সিলেক্ট করুন।`, 'warning');
+        return;
+      }
+
+      // Submit to Supabase
+      submitBtn.disabled = true;
+      submitBtn.innerText = 'জমা হচ্ছে...';
+
+      const { data, error } = await _supabase
+        .from('student_info')
+        .insert([{ name, roll, subject, phone, assigned_group: selectedGroup }]);
+
+      if (error) {
+        showAlert('দুঃখিত, তথ্য জমা দেওয়া সম্ভব হয়নি। আবার চেষ্টা করুন।', 'error');
+      } else {
+        showAlert('ধন্যবাদ! আপনার তথ্য সফলভাবে জমা হয়েছে।', 'success');
+        form.reset();
+      }
+
+      submitBtn.disabled = false;
+      submitBtn.innerHTML = `<span>তথ্য জমা দিন</span> <i class="fa-solid fa-paper-plane text-xs"></i>`;
+    });
+
+    function showAlert(msg, type) {
+      alertBox.classList.remove('hidden', 'bg-red-500/20', 'text-red-300', 'border-red-500/40', 'bg-yellow-500/20', 'text-yellow-300', 'border-yellow-500/40', 'bg-emerald-500/20', 'text-emerald-300', 'border-emerald-500/40');
+      alertBox.classList.add('border');
+
+      if (type === 'error') {
+        alertBox.classList.add('bg-red-500/20', 'text-red-300', 'border-red-500/40');
+      } else if (type === 'warning') {
+        alertBox.classList.add('bg-yellow-500/20', 'text-yellow-300', 'border-yellow-500/40');
+      } else {
+        alertBox.classList.add('bg-emerald-500/20', 'text-emerald-300', 'border-emerald-500/40');
+      }
+
+      alertBox.innerText = msg;
+    }
+  </script>
+</body>
+</html>
